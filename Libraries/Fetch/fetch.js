@@ -194,8 +194,13 @@ var self = {};
     this.credentials = options.credentials || 'omit'
     this.headers = new Headers(options.headers)
     this.method = normalizeMethod(options.method || 'GET')
+    this.follow = true
     this.mode = options.mode || null
     this.referrer = null
+
+    if (options.follow === false) {
+      this.follow = false
+    }
   }
 
   function decode(body) {
@@ -227,7 +232,7 @@ var self = {};
     var self = this
 
     return new Promise(function(resolve, reject) {
-      var xhr = new XMLHttpRequest()
+      var xhr = new XMLHttpRequest(self.follow)
 
       function responseURL() {
         if ('responseURL' in xhr) {

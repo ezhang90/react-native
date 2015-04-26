@@ -26,12 +26,14 @@ class XMLHttpRequestBase {
   status: ?string;
 
   _method: ?string;
+  // TODO(edward): I don't understand these '_' prefixed variables. Doing _follow instead doesn't work.
+  follow: boolean;
   _url: ?string;
   _headers: Object;
   _sent: boolean;
   _aborted: boolean;
 
-  constructor() {
+  constructor(follow: ?boolean) {
     this.UNSENT = 0;
     this.OPENED = 1;
     this.HEADERS_RECEIVED = 2;
@@ -46,10 +48,15 @@ class XMLHttpRequestBase {
     this.status = undefined;
 
     this._method = null;
+    this.follow = true;
     this._url = null;
     this._headers = {};
     this._sent = false;
     this._aborted = false;
+
+    if (follow === false) {
+      this.follow = false;
+    }
   }
 
   getAllResponseHeaders(): ?string {

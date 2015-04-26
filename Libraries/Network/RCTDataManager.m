@@ -14,6 +14,8 @@
 #import "RCTLog.h"
 #import "RCTUtils.h"
 
+#import "NoRedirectSessionDelegate.h"
+
 @implementation RCTDataManager
 
 RCT_EXPORT_MODULE()
@@ -35,9 +37,18 @@ RCT_EXPORT_METHOD(queryData:(NSString *)queryType
     request.HTTPMethod = [RCTConvert NSString:query[@"method"]] ?: @"GET";
     request.allHTTPHeaderFields = [RCTConvert NSDictionary:query[@"headers"]];
     request.HTTPBody = [RCTConvert NSData:query[@"data"]];
-
+    BOOL follow = [RCTConvert BOOL:query[@"follow"]];
+    
+    NSURLSession *urlSession;
+    if (follow) {
+      urlSession = [NSURLSession sharedSession];
+    } else {
+      NoRedirectSessionDelegate *urlSessionDelegate = [[NoRedirectSessionDelegate alloc] init];
+      urlSession = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration] delegate:urlSessionDelegate delegateQueue:nil];
+    }
+    
     // Build data task
-    NSURLSessionDataTask *task = [[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *connectionError) {
+    NSURLSessionDataTask *task = [urlSession dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *connectionError) {
 
       // Build response
       NSDictionary *responseJSON;

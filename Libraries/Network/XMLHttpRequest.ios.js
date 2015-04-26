@@ -24,6 +24,7 @@ class XMLHttpRequest extends XMLHttpRequestBase {
       'http',
       {
         method: method,
+        follow: this.follow,
         url: url,
         data: data,
         headers: headers,
