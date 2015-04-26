@@ -38,17 +38,24 @@ RCT_EXPORT_METHOD(queryData:(NSString *)queryType
     request.allHTTPHeaderFields = [RCTConvert NSDictionary:query[@"headers"]];
     request.HTTPBody = [RCTConvert NSData:query[@"data"]];
     BOOL follow = [RCTConvert BOOL:query[@"follow"]];
-    
+
     NSURLSession *urlSession;
+    NoRedirectSessionDelegate *urlSessionDelegate = nil;
     if (follow) {
       urlSession = [NSURLSession sharedSession];
     } else {
-      NoRedirectSessionDelegate *urlSessionDelegate = [[NoRedirectSessionDelegate alloc] init];
+      urlSessionDelegate = [[NoRedirectSessionDelegate alloc] init];
       urlSession = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration] delegate:urlSessionDelegate delegateQueue:nil];
     }
-    
+
     // Build data task
     NSURLSessionDataTask *task = [urlSession dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *connectionError) {
+
+      #if ! __has_feature(objc_arc)
+      if (!follow) {
+        [urlSessionDelegate release];
+      }
+      #endif
 
       // Build response
       NSDictionary *responseJSON;
@@ -82,6 +89,10 @@ RCT_EXPORT_METHOD(queryData:(NSString *)queryType
     }];
 
     [task resume];
+
+    if (!follow) {
+      [urlSession finishTasksAndInvalidate];
+    }
 
   } else {
 
