@@ -257,7 +257,8 @@ var self = {};
           status: status,
           statusText: xhr.statusText,
           headers: headers(xhr),
-          url: responseURL()
+          url: responseURL(),
+          xhr: xhr
         }
         var body = 'response' in xhr ? xhr.response : xhr.responseText;
         resolve(new Response(body, options))
@@ -304,6 +305,7 @@ var self = {};
     this.statusText = options.statusText
     this.headers = options.headers
     this.url = options.url || ''
+    this.xhr = options.xhr
   }
 
   Body.call(Response.prototype)
